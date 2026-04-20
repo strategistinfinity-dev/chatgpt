@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Wrap Calculator</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: #121b2e;
+        --muted: #9fb2d3;
+        --text: #edf3ff;
+        --accent: #4f8cff;
+        --accent-2: #7fb0ff;
+        --ok: #2ed573;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+        background: linear-gradient(180deg, #071020 0%, #0b1220 40%, #121a2d 100%);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .app {
+        width: min(920px, 100%);
+        background: rgba(18, 27, 46, 0.9);
+        border: 1px solid rgba(127, 176, 255, 0.22);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(1.5rem, 2.2vw, 2rem);
+      }
+
+      .subtitle {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+
+      label {
+        font-size: 0.94rem;
+        color: #d5e4ff;
+      }
+
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(127, 176, 255, 0.4);
+        background: #0f1729;
+        color: var(--text);
+      }
+
+      .actions {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 16px;
+        cursor: pointer;
+      }
+
+      #calculateBtn {
+        background: var(--accent);
+        color: white;
+        font-weight: 600;
+      }
+
+      #resetBtn {
+        background: #1f2c48;
+        color: #dbe8ff;
+      }
+
+      .result {
+        margin-top: 20px;
+        border: 1px solid rgba(127, 176, 255, 0.26);
+        background: #0f182c;
+        border-radius: 14px;
+        padding: 16px;
+      }
+
+      .result h2 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 14px;
+      }
+
+      .metric {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .value {
+        font-weight: 700;
+        color: var(--accent-2);
+      }
+
+      .total {
+        margin-top: 12px;
+        font-size: 1.2rem;
+        color: var(--ok);
+        font-weight: 800;
+      }
+
+      .note {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      @media (max-width: 760px) {
+        .grid,
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <h1>Car Wrap Calculator</h1>
+      <p class="subtitle">Estimate vinyl material, labor hours, and total wrap project cost.</p>
+
+      <section class="grid" aria-label="Calculator Inputs">
+        <div class="field">
+          <label for="vehicleType">Vehicle type</label>
+          <select id="vehicleType">
+            <option value="compact">Compact / Sedan</option>
+            <option value="suv">SUV / Crossover</option>
+            <option value="truck">Truck / Van</option>
+            <option value="exotic">Exotic / Large Body</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="quantity">Number of vehicles</label>
+          <input id="quantity" type="number" min="1" value="1" />
+        </div>
+
+        <div class="field">
+          <label for="coverage">Wrap coverage (%)</label>
+          <input id="coverage" type="number" min="10" max="100" value="100" />
+        </div>
+
+        <div class="field">
+          <label for="wastePercent">Waste / overlap allowance (%)</label>
+          <input id="wastePercent" type="number" min="0" max="30" value="12" />
+        </div>
+
+        <div class="field">
+          <label for="materialCost">Material cost ($ per sq ft)</label>
+          <input id="materialCost" type="number" min="0" step="0.01" value="3.75" />
+        </div>
+
+        <div class="field">
+          <label for="laborRate">Labor rate ($ per hour)</label>
+          <input id="laborRate" type="number" min="0" step="0.01" value="95" />
+        </div>
+
+        <div class="field">
+          <label for="markup">Markup (%)</label>
+          <input id="markup" type="number" min="0" max="100" value="20" />
+        </div>
+
+        <div class="field">
+          <label for="discount">Bulk discount (%)</label>
+          <input id="discount" type="number" min="0" max="50" value="0" />
+        </div>
+      </section>
+
+      <div class="actions">
+        <button id="calculateBtn" type="button">Calculate</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+
+      <section class="result" aria-live="polite">
+        <h2>Estimate</h2>
+        <div class="result-grid">
+          <div class="metric">Estimated area used</div>
+          <div id="areaUsed" class="value">0 sq ft</div>
+
+          <div class="metric">Material cost</div>
+          <div id="materialTotal" class="value">$0.00</div>
+
+          <div class="metric">Estimated labor hours</div>
+          <div id="laborHours" class="value">0 hrs</div>
+
+          <div class="metric">Labor cost</div>
+          <div id="laborTotal" class="value">$0.00</div>
+
+          <div class="metric">Subtotal</div>
+          <div id="subtotal" class="value">$0.00</div>
+
+          <div class="metric">Final total</div>
+          <div id="grandTotal" class="value">$0.00</div>
+        </div>
+        <div id="totalBanner" class="total">Total Project Price: $0.00</div>
+        <div class="note">
+          Baseline square footage and labor estimates use common industry averages and should be adjusted to your shop workflow.
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const baseAreaByVehicle = {
+        compact: { area: 250, hours: 18 },
+        suv: { area: 320, hours: 24 },
+        truck: { area: 390, hours: 30 },
+        exotic: { area: 450, hours: 36 }
+      };
+
+      const fields = {
+        vehicleType: document.getElementById('vehicleType'),
+        quantity: document.getElementById('quantity'),
+        coverage: document.getElementById('coverage'),
+        wastePercent: document.getElementById('wastePercent'),
+        materialCost: document.getElementById('materialCost'),
+        laborRate: document.getElementById('laborRate'),
+        markup: document.getElementById('markup'),
+        discount: document.getElementById('discount')
+      };
+
+      const outputs = {
+        areaUsed: document.getElementById('areaUsed'),
+        materialTotal: document.getElementById('materialTotal'),
+        laborHours: document.getElementById('laborHours'),
+        laborTotal: document.getElementById('laborTotal'),
+        subtotal: document.getElementById('subtotal'),
+        grandTotal: document.getElementById('grandTotal'),
+        totalBanner: document.getElementById('totalBanner')
+      };
+
+      function asNumber(value, fallback = 0) {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : fallback;
+      }
+
+      function toCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(amount);
+      }
+
+      function calculateEstimate() {
+        const type = fields.vehicleType.value;
+        const baseline = baseAreaByVehicle[type];
+
+        const quantity = Math.max(1, asNumber(fields.quantity.value, 1));
+        const coveragePct = Math.min(100, Math.max(10, asNumber(fields.coverage.value, 100))) / 100;
+        const wastePct = Math.min(30, Math.max(0, asNumber(fields.wastePercent.value, 12))) / 100;
+
+        const materialRate = Math.max(0, asNumber(fields.materialCost.value, 0));
+        const laborRate = Math.max(0, asNumber(fields.laborRate.value, 0));
+        const markupPct = Math.min(100, Math.max(0, asNumber(fields.markup.value, 0))) / 100;
+        const discountPct = Math.min(50, Math.max(0, asNumber(fields.discount.value, 0))) / 100;
+
+        const areaPerVehicle = baseline.area * coveragePct * (1 + wastePct);
+        const hoursPerVehicle = baseline.hours * coveragePct;
+
+        const totalArea = areaPerVehicle * quantity;
+        const totalHours = hoursPerVehicle * quantity;
+
+        const materialTotal = totalArea * materialRate;
+        const laborTotal = totalHours * laborRate;
+
+        const subtotal = materialTotal + laborTotal;
+        const markedUp = subtotal * (1 + markupPct);
+        const grandTotal = markedUp * (1 - discountPct);
+
+        outputs.areaUsed.textContent = `${totalArea.toFixed(1)} sq ft`;
+        outputs.materialTotal.textContent = toCurrency(materialTotal);
+        outputs.laborHours.textContent = `${totalHours.toFixed(1)} hrs`;
+        outputs.laborTotal.textContent = toCurrency(laborTotal);
+        outputs.subtotal.textContent = toCurrency(subtotal);
+        outputs.grandTotal.textContent = toCurrency(grandTotal);
+        outputs.totalBanner.textContent = `Total Project Price: ${toCurrency(grandTotal)}`;
+      }
+
+      function resetFields() {
+        fields.vehicleType.value = 'compact';
+        fields.quantity.value = 1;
+        fields.coverage.value = 100;
+        fields.wastePercent.value = 12;
+        fields.materialCost.value = 3.75;
+        fields.laborRate.value = 95;
+        fields.markup.value = 20;
+        fields.discount.value = 0;
+        calculateEstimate();
+      }
+
+      document.getElementById('calculateBtn').addEventListener('click', calculateEstimate);
+      document.getElementById('resetBtn').addEventListener('click', resetFields);
+
+      Object.values(fields).forEach((field) => {
+        field.addEventListener('change', calculateEstimate);
+      });
+
+      calculateEstimate();
+    </script>
+  </body>
+</html>
